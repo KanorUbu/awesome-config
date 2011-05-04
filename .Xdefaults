@@ -1,0 +1,87 @@
+!-------------------------------------------------------------------------------
+!
+!    U R X V T - M L - Setting
+!
+!
+! Taille par défaut
+URxvt*geometry: 74x27
+
+! Police TTF
+URxvt*font: xft:Bitstream Vera Sans Mono:style=Regular:pixelsize=13:antialias=true
+
+! Taille du buffer et barre de défilement
+URxvt*saveLines: 10000
+URxvt*scrollBar: true
+URxvt*scrollBar_right: true
+URxvt*scrollColor: #939393
+URxvt*scrollBar_floating: true
+URxvt*scrollstyle: plain
+URxvt*matcher.button:   1
+
+! Curseur
+URxvt*cursorColor:         #939393
+URxvt*cursorBlink:      true
+URxvt*cursorUnderline:  true
+
+! Support des Onglets (avec "shift + curseur_bas" = nouvel onglet, et "shift + gauche/droite" = pour changer)
+URxvt.perl-ext:                default,matcher,tabbed
+URxvt.tabbed.tabbar-fg:     7
+URxvt.tabbed.tabbar-bg:     0
+URxvt.tabbed.tab-fg:        7
+URxvt.tabbed.tab-bg:        0
+
+! Nom du terminal
+URxvt*termName:         rxvt-unicode
+
+! Utilisation de la vraie transparence (transparent=100 - 0=opaque)
+URxvt.transparent:        true
+URxvt.shading:            30
+
+! Apparence
+URxvt*background:         #5E5E5E
+URxvt*foreground:         #939393
+URxvt*allow_bold:         true
+
+! Autres paramètres
+URxvt*colorBD:          #939393
+URxvt*internalBorder:   3
+Xft*dpi:                96
+Xft*antialias:          true
+Xft*hinting:            full
+URxvt.loginShell:       true
+URxvt.saveLines:        666
+URxvt*mapAlert:         true
+URxvt*visualBell:       true
+URxvt*urgentOnBell:     true
+URxvt*inheritPixmap:    true
+URxvt*tintColor:        black
+URxvt*shading:          60
+
+
+! Thème de Couleurs
+!Black
+URxvt*color0:           #3d3e3d
+URxvt*color8:           #5a5b5c
+!Red
+URxvt*color1:           #755a5b
+URxvt*color9:           #a37679
+!Green
+URxvt*color2:           #68755a
+URxvt*color10:          #87a376
+!Yellow
+URxvt*color3:           #756e5a
+URxvt*color11:          #a39b76
+!Blue
+URxvt*color4:           #5b6976
+URxvt*color12:          #758ba3
+!Magenta
+URxvt*color5:           #755b76
+URxvt*color13:          #9f76a3
+!Cyan
+URxvt*color6:           #5b7674
+URxvt*color14:          #75a3a1
+!White
+URxvt*color7:           #808080
+URxvt*color15:          #aeafb0
+
+URxvt.urlLauncher: firefox
