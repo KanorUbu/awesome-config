@@ -15,7 +15,7 @@ require("vicious")
 require('freedesktop.utils')
 
 require('freedesktop.menu')
-
+require("wicked")
 -- Sound Control
 cardid  = 0
 channel = "Master"
@@ -49,7 +49,7 @@ function volume (mode, widget)
 end
 
 -- Enable mocp
-function moc_control (action)
+	function moc_control (action)
     local moc_info,moc_state
 
     if action == "next" then
@@ -62,6 +62,15 @@ function moc_control (action)
         io.popen("mpc toggle")
     end
 end
+
+--[[wicked.register(mpdwidget, wicked.widgets.mpd,
+	function (widget, args)
+		   if args[1]:find("volume:") == nil then
+		      return ' <span color="white">En cours de lecture :</span> '..args[1]
+		   else
+                      return ''
+                   end
+		end)]]
 
 
 
@@ -136,7 +145,7 @@ beautiful.init(awful.util.getdir("config") .. "/theme_actuel/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 --terminal = "x-terminal-emulator"
-terminal = "urxvtc"
+terminal = "urxvt"
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -194,6 +203,7 @@ mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
 freedesktop.utils.terminal = terminal -- default: "xterm"
 freedesktop.utils.icon_theme = 'gnome' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
 menu_items = freedesktop.menu.new()
+
 myfreedesktop = awful.menu.new({ items = menu_items, width = 150 })
 
 myfreelauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
@@ -311,38 +321,7 @@ for s = 1, screen.count() do
     tb_volume_timer:add_signal("timeout", function () volume("update", tb_volume) end)
     tb_volume_timer:start()
 
-    -- Moc Widget
-    tb_moc = widget({ type = "textbox", align = "right" })
 
-    function hook_moc()
-           moc_info = io.popen("mocp -i"):read("*all")
-           moc_state = string.gsub(string.match(moc_info, "State: %a*"),"State: ","")
-           if moc_state == "PLAY" or moc_state == "PAUSE" then
-               moc_artist = string.gsub(string.match(moc_info, "Artist: %C*"), "Artist: ","")
-               moc_title = string.gsub(string.match(moc_info, "SongTitle: %C*"), "SongTitle: ","")
-               moc_curtime = string.gsub(string.match(moc_info, "CurrentTime: %d*:%d*"), "CurrentTime: ","")
-               moc_totaltime = string.gsub(string.match(moc_info, "TotalTime: %d*:%d*"), "TotalTime: ","")
-               if moc_artist == "" then
-                   moc_artist = "unknown artist"
-               end
-               if moc_title == "" then
-                   moc_title = "unknown title"
-               end
-           -- moc_title = string.format("%.5c", moc_title)
-               moc_string = moc_artist .. " - " .. moc_title .. "(" .. moc_curtime .. "/" .. moc_totaltime .. ")"
-               if moc_state == "PAUSE" then
-                   moc_string = "PAUSE - " .. moc_string .. ""
-               end
-           else
-               moc_string = "-- not playing --"
-           end
-           return moc_string
-    end
-
-    -- refresh Moc widget
-    moc_timer = timer({timeout = 1})
-    moc_timer:add_signal("timeout", function() tb_moc.text = '| ' .. hook_moc() .. ' ' end)
-    moc_timer:start()
 
 
     -- Create the wibox
@@ -363,7 +342,7 @@ for s = 1, screen.count() do
         batinfo,
         mylayoutbox[s],
         mytextclock,
-        tb_moc,
+        --mpdwidget,
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -569,6 +548,7 @@ client.add_signal("unfocus", function(c) c.border_color = beautiful.border_norma
 awful.util.spawn('nm-applet &')
 awful.util.spawn('padevchooser &')
 awful.util.spawn("xmodmap -e 'keycode 49 = x'")
-awful.util.spawn("urxvtd -q -f -o &")
+awful.util.spawn("hotot")
+-- awful.util.spawn("urxvtd -q -f -o &")
 --}}}
 
