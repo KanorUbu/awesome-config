@@ -8,7 +8,7 @@
 
 -- {{{ Main
 theme = {}
-theme.wallpaper_cmd = { "awsetbg /usr/share/awesome/themes/zenburn/zenburn-background.png" }
+theme.wallpaper_cmd = { "awsetbg /home/tyrus/Images/Trie/One_day__in_the_big_city-1680x1050.jpg"}
 -- }}}
 
 -- {{{ Styles

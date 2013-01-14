@@ -2,6 +2,7 @@
 require("awful")
 require("awful.autofocus")
 require("awful.rules")
+vicious = require("vicious")
 -- Theme handling library
 require("beautiful")
 -- Notification library
@@ -10,142 +11,26 @@ require("naughty")
 -- Load Debian menu entries
 --require("debian.menu")
 require("revelation")
-require("vicious")
 -- applications menu
-require('freedesktop.utils')
+require("freedesktop.utils")
 
-require('freedesktop.menu')
-require("wicked")
--- Sound Control
-cardid  = 0
-channel = "Master"
-function volume (mode, widget)
-    if mode == "update" then
-             local fd = io.popen("amixer -c " .. cardid .. " -- sget " .. channel)
-             local status = fd:read("*all")
-             fd:close()
+require("freedesktop.menu")
+--require("wicked")
+require("delightful.widgets.pulseaudio")
 
-        local volume = string.match(status, "(%d?%d?%d)%%")
-        volume = string.format("% 3d", volume)
-
-        status = string.match(status, "%[(o[^%]]*)%]")
-
-        if string.find(status, "on", 1, true) then
-            volume = "| Vol:<span color='green'>" .. volume .. "</span>% "
-        else
-            volume = "| Vol:<span color='red'>" .. volume .. "</span>M "
-        end
-        widget.text = volume
-    elseif mode == "up" then
-        io.popen("amixer -q -c " .. cardid .. " sset " .. channel .. " 5%+"):read("*all")
-        volume("update", widget)
-    elseif mode == "down" then
-        io.popen("amixer -q -c " .. cardid .. " sset " .. channel .. " 5%-"):read("*all")
-        volume("update", widget)
-    else
-        io.popen("amixer -c " .. cardid .. " sset " .. channel .. " toggle"):read("*all")
-        volume("update", widget)
-    end
-end
-
--- Enable mocp
-	function moc_control (action)
-    local moc_info,moc_state
-
-    if action == "next" then
-        io.popen("mpc next")
-    elseif action == "previous" then
-        io.popen("mpc prev")
-    elseif action == "stop" then
-        io.popen("mpc stop")
-    elseif action == "play_pause" then
-        io.popen("mpc toggle")
-    end
-end
-
---[[wicked.register(mpdwidget, wicked.widgets.mpd,
-	function (widget, args)
-		   if args[1]:find("volume:") == nil then
-		      return ' <span color="white">En cours de lecture :</span> '..args[1]
-		   else
-                      return ''
-                   end
-		end)]]
+require("perso_module.sound")
+require("perso_module.mpd")
+print("Coucou chargement de la config")
 
 
-
--- Battery status Widget
-
--- get the full capacity of the battery
-for line in io.lines("/proc/acpi/battery/BAT0/info") do
-    bat_stat = string.match(line, "last full capacity:\ +(%d+)")
-
-    if bat_stat then
-        -- define stat_tot for reuse later for battery status
-        stat_tot = bat_stat
-    end
-end
-
-function activebat()
-    local stat_actu, res
-
-    for line in io.lines("/proc/acpi/battery/BAT0/state") do
-        local present = string.match(line, "present:\ +(%a+)")
-        if (present == "no") then
-            return '<span color="red">not present</span>'
-        end
-        local status  =  string.match(line, "remaining capacity:\ +(%d+)")
-        local state = string.match(line, "charging state:\ +(%a+)")
-        if status then
-            stat_actu = status
-        end
-        if state then
-            stat_bat = state
-        end
-    end
-
-    res = string.format("%.2f", (stat_actu/stat_tot) * 100);
-
-    if ((stat_actu/stat_tot) * 100)  < 10 then
-        res = '<span color="red">' .. res .. '</span>'
-    elseif  ((stat_actu/stat_tot) * 100) < 20 then
-        res = '<span color="orange">' .. res .. '</span>'
-    elseif  ((stat_actu/stat_tot) * 100)  < 30 then
-        res = '<span color="yellow">' .. res .. '</span>'
-    elseif ((stat_actu/stat_tot) * 100) >= 100 then
-        return '<span color="green">fully charged</span>'
-    else
-        res = '<span color="green">' .. res .. '</span>'
-    end
-
-    if (stat_bat == 'discharging') then
-        stat_bat = '<span color="red">discharging</span>'
-    elseif (stat_bat == 'charging') then
-        stat_bat = '<span color = "green">charging</span>'
-    end
-
-    res = res .. '% ' .. stat_bat
-
-
-    return res
-end
-
-batinfo = widget({ type = "textbox" , name = "batinfo" })
-
--- Assign a hook to update info
--- awful.hooks.timer.register(1, function() batinfo.text = "BAT: " .. activebat() .. " |" end)
-activebat_timer = timer({timeout = 1})
-activebat_timer:add_signal("timeout", function() batinfo.text = "BAT: " .. activebat() .. " |" end)
-activebat_timer:start()
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
---beautiful.init("/usr/share/awesome/themes/default/theme.lua")
 beautiful.init(awful.util.getdir("config") .. "/theme_actuel/theme.lua")
+beautiful.wallpaper_cmd = { "awsetbg /usr/share/awesome/themes/zenburn/zenburn-background.png" }
 
 -- This is used later as the default terminal and editor to run.
---terminal = "x-terminal-emulator"
-terminal = "urxvt"
+terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -193,33 +78,29 @@ myawesomemenu = {
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    --{ "Debian", debian.menu.Debian_menu.Debian },
                                     { "open terminal", terminal }
                                   }
                         })
-
 mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
                                      menu = mymainmenu })
-freedesktop.utils.terminal = terminal -- default: "xterm"
+-- Menu mise à jour suivant les convention freedesktop
+freedesktop.utils.terminal = terminal
 freedesktop.utils.icon_theme = 'gnome' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
 menu_items = freedesktop.menu.new()
-
 myfreedesktop = awful.menu.new({ items = menu_items, width = 150 })
-
 myfreelauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = myfreedesktop })
-
-
-  -- desktop icons
-  require('freedesktop.desktop')
-  for s = 1, screen.count() do
-        freedesktop.desktop.add_applications_icons({screen = s, showlabels = true})
-        freedesktop.desktop.add_dirs_and_files_icons({screen = s, showlabels = true})
-  end
+-- desktop icons
+require('freedesktop.desktop')
+for s = 1, screen.count() do
+    freedesktop.desktop.add_applications_icons({screen = s, showlabels = true})
+    freedesktop.desktop.add_dirs_and_files_icons({screen = s, showlabels = true})
+end
 -- }}}
 
 -- {{{ Wibox
 -- Create a textclock widget
+os.setlocale("fr_FR.UTF-8")
 mytextclock = awful.widget.textclock({ align = "right" })
 
 -- Create a systray
@@ -302,27 +183,23 @@ for s = 1, screen.count() do
     -- Register widget
     vicious.register(memwidget, vicious.widgets.mem, "$1", 13)
 
+    -- Initialize widget
+    mpdwidget = widget({ type = "textbox" })
+    -- Register widget
+    vicious.register(mpdwidget, vicious.widgets.mpd,
+    function (widget, args)
+        if args["{state}"] == "Stop" then
+            return " - "
+        else
+            return args["{Artist}"]..' - '.. args["{Title}"]
+        end
+    end, 10)
+
     myspacer         = widget({ type = "textbox", name = "myspacer" })
     myseparator      = widget({ type = "textbox", name = "myseparator" })
 
     myspacer.text    = " "
     myseparator.text = "|"
-    -- Create Volume Control Widget
-     tb_volume = widget({ type = "textbox", name = "tb_volume", align = "right" })
-     tb_volume:buttons(awful.util.table.join(
-        awful.button({ }, 4, function () volume("up", tb_volume) end),
-        awful.button({ }, 5, function () volume("down", tb_volume) end),
-        awful.button({ }, 1, function () volume("mute", tb_volume) end)
-     ))
-     volume("update", tb_volume)
-
-    -- refresh the Volume Control Widget
-    tb_volume_timer = timer({ timeout = 10 })
-    tb_volume_timer:add_signal("timeout", function () volume("update", tb_volume) end)
-    tb_volume_timer:start()
-
-
-
 
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
@@ -337,12 +214,11 @@ for s = 1, screen.count() do
         },
         myspace, myspacer,
         memwidget,
-        myspace, myspacer,
         tb_volume,
-        batinfo,
+        mpdwidget,
+        myspace, myspacer,
         mylayoutbox[s],
         mytextclock,
-        --mpdwidget,
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -420,10 +296,10 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86AudioRaiseVolume", function () volume("up", tb_volume) end),
     awful.key({ }, "XF86AudioLowerVolume", function () volume("down", tb_volume) end),
     awful.key({ }, "XF86AudioMute", function () volume("mute", tb_volume) end),
-    awful.key({ }, "XF86AudioNext", function () moc_control("next") end),
-    awful.key({ }, "XF86AudioPrev", function () moc_control("previous") end),
-    awful.key({ }, "XF86AudioStop", function () moc_control("stop") end),
-    awful.key({ }, "XF86AudioPlay", function () moc_control("play_pause") end)
+    awful.key({ }, "XF86AudioNext", function () mpd_control("next") end),
+    awful.key({ }, "XF86AudioPrev", function () mpd_control("previous") end),
+    awful.key({ }, "XF86AudioStop", function () mpd_control("stop") end),
+    awful.key({ }, "XF86AudioPlay", function () mpd_control("play_pause") end)
 )
 
 clientkeys = awful.util.table.join(
@@ -544,11 +420,43 @@ client.add_signal("focus", function(c) c.border_color = beautiful.border_focus e
 client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 --
+--
+ --Which widgets to install?
+ --This is the order the widgets appear in the wibox.
+--install_delightful = {
+--    delightful.widgets.pulseaudio
+--}
+--
+-- --Widget configuration
+--delightful_config = {
+--    [delightful.widgets.pulseaudio] = {
+--        mixer_command = 'pavucontrol',
+--    }
+--}
+--
+-- --Prepare the container that is used when constructing the wibox
+--local delightful_container = { widgets = {}, icons = {} }
+--if install_delightful then
+--    for _, widget in pairs(awful.util.table.reverse(install_delightful)) do
+--        local config = delightful_config and delightful_config[widget]
+--        local widgets, icons = widget:load(config)
+--        if widgets then
+--            if not icons then
+--                icons = {}
+--            end
+--            table.insert(delightful_container.widgets, awful.util.table.reverse(widgets))
+--            table.insert(delightful_container.icons,   awful.util.table.reverse(icons))
+--        end
+--    end
+--end
+--
 --{{{ Start programm
 awful.util.spawn('nm-applet &')
-awful.util.spawn('padevchooser &')
+--awful.util.spawn('padevchooser &')
 awful.util.spawn("xmodmap -e 'keycode 49 = x'")
-awful.util.spawn("hotot")
--- awful.util.spawn("urxvtd -q -f -o &")
+--awful.util.spawn("hotot &")
+--awful.util.spawn("python -OOt /home/tyrus/Source/gajim/src/gajim.py")
+awful.util.spawn("urxvtd -q -f -o")
+awful.util.spawn('batti &')
 --}}}
 

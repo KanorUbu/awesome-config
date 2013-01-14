@@ -1,0 +1,6 @@
+[submodule "freedesktop-repo"]
+	path = freedesktop-repo
+	url = git://github.com/terceiro/awesome-freedesktop.git
+[submodule "delightful-repo"]
+	path = delightful-repo
+	url = git://scm.solitudo.net/delightful.git
