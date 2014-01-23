@@ -2,7 +2,7 @@
 require("awful")
 require("awful.autofocus")
 require("awful.rules")
-vicious = require("vicious")
+--vicious = require("vicious")
 -- Theme handling library
 require("beautiful")
 -- Notification library
@@ -12,22 +12,23 @@ require("naughty")
 --require("debian.menu")
 require("revelation")
 -- applications menu
-require("freedesktop.utils")
+--require("freedesktop.utils")
 
-require("freedesktop.menu")
+--require("freedesktop.menu")
 --require("wicked")
 require("delightful.widgets.pulseaudio")
 
 require("perso_module.sound")
 require("perso_module.mpd")
-print("Coucou chargement de la config")
 
 
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 beautiful.init(awful.util.getdir("config") .. "/theme_actuel/theme.lua")
+--beautiful.init("/usr/share/awesome/themes/default/theme.lua")
 beautiful.wallpaper_cmd = { "awsetbg /usr/share/awesome/themes/zenburn/zenburn-background.png" }
+
 
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvtc"
@@ -66,6 +67,7 @@ for s = 1, screen.count() do
     -- Each screen has its own tag table.
     tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
 end
+
 -- }}}
 
 -- {{{ Menu
@@ -83,20 +85,21 @@ mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesom
                         })
 mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
                                      menu = mymainmenu })
+
 -- Menu mise à jour suivant les convention freedesktop
-freedesktop.utils.terminal = terminal
-freedesktop.utils.icon_theme = 'gnome' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
-menu_items = freedesktop.menu.new()
-myfreedesktop = awful.menu.new({ items = menu_items, width = 150 })
-myfreelauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = myfreedesktop })
--- desktop icons
-require('freedesktop.desktop')
-for s = 1, screen.count() do
-    freedesktop.desktop.add_applications_icons({screen = s, showlabels = true})
-    freedesktop.desktop.add_dirs_and_files_icons({screen = s, showlabels = true})
-end
--- }}}
+--freedesktop.utils.terminal = terminal
+--freedesktop.utils.icon_theme = 'gnome' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
+--menu_items = freedesktop.menu.new()
+--myfreedesktop = awful.menu.new({ items = menu_items, width = 150 })
+--myfreelauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
+--                                     menu = myfreedesktop })
+---- desktop icons
+--require('freedesktop.desktop')
+--for s = 1, screen.count() do
+--    freedesktop.desktop.add_applications_icons({screen = s, showlabels = true})
+--    freedesktop.desktop.add_dirs_and_files_icons({screen = s, showlabels = true})
+--end
+ --}}}
 
 -- {{{ Wibox
 -- Create a textclock widget
@@ -181,19 +184,19 @@ for s = 1, screen.count() do
     memwidget:set_color("#AECF96")
     memwidget:set_gradient_colors({ "#AECF96", "#88A175", "#FF5656" })
     -- Register widget
-    vicious.register(memwidget, vicious.widgets.mem, "$1", 13)
+    --vicious.register(memwidget, vicious.widgets.mem, "$1", 13)
 
     -- Initialize widget
     mpdwidget = widget({ type = "textbox" })
     -- Register widget
-    vicious.register(mpdwidget, vicious.widgets.mpd,
-    function (widget, args)
-        if args["{state}"] == "Stop" then
-            return " - "
-        else
-            return args["{Artist}"]..' - '.. args["{Title}"]
-        end
-    end, 10)
+    --vicious.register(mpdwidget, vicious.widgets.mpd,
+    --function (widget, args)
+    --    if args["{state}"] == "Stop" then
+    --        return " - "
+    --    else
+    --        return args["{Artist}"]..' - '.. args["{Title}"]
+    --    end
+    --end, 10)
 
     myspacer         = widget({ type = "textbox", name = "myspacer" })
     myseparator      = widget({ type = "textbox", name = "myseparator" })
@@ -225,6 +228,7 @@ for s = 1, screen.count() do
     }
 end
 -- }}}
+--
 
 
 -- {{{ Mouse bindings
@@ -451,12 +455,9 @@ client.add_signal("unfocus", function(c) c.border_color = beautiful.border_norma
 --end
 --
 --{{{ Start programm
-awful.util.spawn('nm-applet &')
---awful.util.spawn('padevchooser &')
-awful.util.spawn("xmodmap -e 'keycode 49 = x'")
---awful.util.spawn("hotot &")
---awful.util.spawn("python -OOt /home/tyrus/Source/gajim/src/gajim.py")
-awful.util.spawn("urxvtd -q -f -o")
-awful.util.spawn('batti &')
+os.execute('nm-applet &')
+os.execute("xmodmap -e 'keycode 49 = x'")
+os.execute("urxvtd -q -f -o")
+os.execute('batti &')
 --}}}
 
